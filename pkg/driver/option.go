@@ -153,7 +153,7 @@ type UploadMultipartOptions struct {
 
 func DefalutUploadMultipartOptions() *UploadMultipartOptions {
 	return &UploadMultipartOptions{
-		ThreadsNum:       10,
+		ThreadsNum:       32,
 		Timeout:          time.Hour * 24,
 		TokenRefreshTime: time.Minute * 50,
 	}
