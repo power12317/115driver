@@ -8,7 +8,7 @@
 package main
 
 import (
-    "github.com/SheltonZhu/115driver/pkg/driver"
+    "github.com/power12317/115driver/pkg/driver"
     "log"
 )
 

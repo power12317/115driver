@@ -3,6 +3,7 @@ module github.com/power12317/115driver
 go 1.20
 
 require (
+	github.com/SheltonZhu/115driver v1.0.21
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.5+incompatible
 	github.com/gaoyb7/115drive-webdav v0.1.8
 	github.com/go-resty/resty/v2 v2.7.0
