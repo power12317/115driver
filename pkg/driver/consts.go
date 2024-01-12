@@ -4,7 +4,7 @@ const (
 	UADefalut    = "Mozilla/5.0"
 	UA115Browser = "Mozilla/5.0 115Browser/23.9.3.2"
 	UA115Disk    = "Mozilla/5.0 115disk/30.1.0"
-	UA115Desktop = "Mozilla/5.0 115Desktop/2.0.3.6"
+	UA115Desktop = "Mozilla/5.0; Windows NT/10.0.20348; 115Desktop/2.0.6.6"
 	UAIosApp     = "Mozilla/5.0; Darwin/10.0; UDown/30.1.0"
 )
 

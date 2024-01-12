@@ -234,7 +234,7 @@ func (c *Pan115Client) UploadSHA1(fileSize int64, fileName, dirID, preID, fileID
 
 const (
 	md5Salt = "Qclm8MGWUv59TnrR0XPg"
-	appVer  = "2.0.3.6"
+	appVer  = "2.0.6.6"
 )
 
 func (c *Pan115Client) UploadDigestRange(r io.ReadSeeker, rangeSpec string) (result string, err error) {
