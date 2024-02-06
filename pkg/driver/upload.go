@@ -29,6 +29,18 @@ func (c *Pan115Client) GetDigestResult(r io.Reader) (*hash.DigestResult, error) 
 	return &d, hash.Digest(r, &d)
 }
 
+// GetUploadEndpoint get upload endPoint
+func (c *Pan115Client) GetUploadEndpoint(endpoint *UploadEndpointResp) error {
+	req := c.NewRequest().
+		ForceContentType("application/json;charset=UTF-8").
+		SetResult(&endpoint)
+	_, err := req.Get(ApiGetUploadEndpoint)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // GetUploadInfo get some info for upload
 func (c *Pan115Client) GetUploadInfo() error {
 	result := UploadInfoResp{}
@@ -56,8 +68,14 @@ func (c *Pan115Client) UploadAvailable() (bool, error) {
 	return true, nil
 }
 
-// UploadFastOrByOSS check sha1 then upload by oss
+// UploadFastOrByOSS Upload By OSS when unable to rapid upload file
+// Deprecated: As of v1.0.22, this function simply calls [RapidUploadOrByOSS].
 func (c *Pan115Client) UploadFastOrByOSS(dirID, fileName string, fileSize int64, r io.ReadSeeker) error {
+	return c.RapidUploadOrByOSS(dirID, fileName, fileSize, r)
+}
+
+// RapidUploadOrByOSS Upload By OSS when unable to rapid upload file
+func (c *Pan115Client) RapidUploadOrByOSS(dirID, fileName string, fileSize int64, r io.ReadSeeker) error {
 	var (
 		err      error
 		digest   *hash.DigestResult
@@ -74,7 +92,7 @@ func (c *Pan115Client) UploadFastOrByOSS(dirID, fileName string, fileSize int64,
 		return err
 	}
 	// 闪传
-	if fastInfo, err = c.UploadSHA1(
+	if fastInfo, err = c.RapidUpload(
 		digest.Size, fileName, dirID, digest.PreID, digest.QuickID, r,
 	); err != nil {
 		return err
@@ -91,13 +109,35 @@ func (c *Pan115Client) UploadFastOrByOSS(dirID, fileName string, fileSize int64,
 	return c.UploadByOSS(&fastInfo.UploadOSSParams, r, dirID)
 }
 
+// getOSSEndpoint get oss endpoint 利用阿里云内网上传文件，需要在阿里云服务器上运行本程序，同时也需要115在服务器的所在地域开通了阿里云OSS
+func (c *Pan115Client) getOSSEndpoint(enableInternalUpload bool) string {
+	if enableInternalUpload {
+		uploadEndpoint := UploadEndpointResp{}
+		if err := c.GetUploadEndpoint(&uploadEndpoint); err != nil {
+			// TODO warn error log
+			return OSSEndpoint
+		}
+		i := strings.Index(uploadEndpoint.Endpoint, ".aliyuncs.com")
+		if i > -1 {
+			endpoint := uploadEndpoint.Endpoint[:i] + "-internal" + uploadEndpoint.Endpoint[i:]
+			return endpoint
+		}
+	}
+	return OSSEndpoint
+}
+
+// GetOSSEndpoint get oss endpoint 利用阿里云内网上传文件，需要在阿里云服务器上运行本程序，同时也需要115在服务器的所在地域开通了阿里云OSS
+func (c *Pan115Client) GetOSSEndpoint(enableInternalUpload bool) string {
+	return c.getOSSEndpoint(enableInternalUpload)
+}
+
 // UploadByOSS use aliyun sdk to upload
 func (c *Pan115Client) UploadByOSS(params *UploadOSSParams, r io.Reader, dirID string) error {
 	ossToken, err := c.GetOSSToken()
 	if err != nil {
 		return err
 	}
-	ossClient, err := oss.New(OSSEndpoint, ossToken.AccessKeyID, ossToken.AccessKeySecret)
+	ossClient, err := oss.New(c.getOSSEndpoint(c.UseInternalUpload), ossToken.AccessKeyID, ossToken.AccessKeySecret)
 	if err != nil {
 		return err
 	}
@@ -145,8 +185,14 @@ func (c *Pan115Client) GetOSSToken() (*UploadOSSTokenResp, error) {
 	return &result, CheckErr(err, &result, resp)
 }
 
-// UploadSHA1 upload a sha1 for upload
+// UploadSHA1 upload a sha1, alias of RapidUpload
+// Deprecated: As of v1.0.22, this function simply calls [RapidUpload].
 func (c *Pan115Client) UploadSHA1(fileSize int64, fileName, dirID, preID, fileID string, r io.ReadSeeker) (*UploadInitResp, error) {
+	return c.RapidUpload(fileSize, fileName, dirID, preID, fileID, r)
+}
+
+// RapidUpload rapid upload
+func (c *Pan115Client) RapidUpload(fileSize int64, fileName, dirID, preID, fileID string, r io.ReadSeeker) (*UploadInitResp, error) {
 	var (
 		ecdhCipher   *cipher.EcdhCipher
 		encrypted    []byte
@@ -268,8 +314,14 @@ func (c *Pan115Client) GenerateToken(fileID, preID, timeStamp, fileSize, signKey
 	return hex.EncodeToString(tokenMd5[:])
 }
 
-// UploadFastOrByMultipart  check sha1 then upload by mutipart blocks
+// UploadFastOrByMultipart upload by mutipart blocks when unable to rapid upload
+// Deprecated: As of v1.0.22, this function simply calls [RapidUploadOrByMultipart].
 func (c *Pan115Client) UploadFastOrByMultipart(dirID, fileName string, fileSize int64, r *os.File, opts ...UploadMultipartOption) error {
+	return c.RapidUploadOrByMultipart(dirID, fileName, fileSize, r, opts...)
+}
+
+// RapidUploadOrByMultipart upload by mutipart blocks when unable to rapid upload
+func (c *Pan115Client) RapidUploadOrByMultipart(dirID, fileName string, fileSize int64, r *os.File, opts ...UploadMultipartOption) error {
 	var (
 		err      error
 		digest   *hash.DigestResult
@@ -286,7 +338,7 @@ func (c *Pan115Client) UploadFastOrByMultipart(dirID, fileName string, fileSize 
 		return err
 	}
 	// 闪传
-	if fastInfo, err = c.UploadSHA1(
+	if fastInfo, err = c.RapidUpload(
 		digest.Size, fileName, dirID, digest.PreID, digest.QuickID, r,
 	); err != nil {
 		return err
@@ -331,7 +383,7 @@ func (c *Pan115Client) UploadByMultipart(params *UploadOSSParams, fileSize int64
 		return err
 	}
 
-	if ossClient, err = oss.New(OSSEndpoint, ossToken.AccessKeyID, ossToken.AccessKeySecret); err != nil {
+	if ossClient, err = oss.New(c.getOSSEndpoint(c.UseInternalUpload), ossToken.AccessKeyID, ossToken.AccessKeySecret); err != nil {
 		return err
 	}
 

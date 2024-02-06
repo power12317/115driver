@@ -132,6 +132,12 @@ func TestGetUploadInfo(t *testing.T) {
 	assert.Nil(t, client.GetUploadInfo())
 }
 
+func TestGetUPloadEndpoint(t *testing.T) {
+	result := UploadEndpointResp{}
+	assert.NoError(t, New().GetUploadEndpoint(&result))
+	assert.NotEmpty(t, result)
+}
+
 func TestUploadSHA1(t *testing.T) {
 	down := teardown(t)
 	defer down(t)
@@ -256,6 +262,35 @@ func TestQRCodeStart(t *testing.T) {
 		assert.Nil(t, err)
 	} else {
 		_, err = c.QRCodeLogin(s)
+		assert.Error(t, err)
+	}
+}
+
+func TestQRCodeStartByOtherApp(t *testing.T) {
+	t.Skip()
+	c := New(WithTrace(), WithDebug())
+	s, err := c.QRCodeStart()
+	assert.Nil(t, err)
+
+	f, _ := os.CreateTemp("./", "tmp-qrcode-*.png")
+	defer func() {
+		f.Close()
+		os.Remove(f.Name())
+	}()
+	b, err := s.QRCodeByApi()
+	assert.Nil(t, err)
+
+	_, err = f.Write(b)
+	assert.Nil(t, err)
+
+	status, err := c.QRCodeStatus(s)
+	assert.Nil(t, err)
+
+	if status.IsAllowed() {
+		_, err = c.QRCodeLoginWithApp(s, LoginAppIOS)
+		assert.Nil(t, err)
+	} else {
+		_, err = c.QRCodeLoginWithApp(s, LoginAppIOS)
 		assert.Error(t, err)
 	}
 }

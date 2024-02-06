@@ -1,6 +1,31 @@
 # 115driver
 
-![Version](https://img.shields.io/badge/release-v1.0.21-brightgreen?style=flat-square) [![Reference](https://img.shields.io/badge/Go-Reference-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/SheltonZhu/115driver) ![License](https://img.shields.io/:License-MIT-green.svg?style=flat-square)
+🖴 A 115 cloud driver package.
+
+[![Goreport](https://goreportcard.com/badge/github.com/SheltonZhu/115driver)](https://goreportcard.com/report/github.com/SheltonZhu/115driver) [![Release](https://img.shields.io/github/release/SheltonZhu/115driver)](https://github.com/SheltonZhu/115driver/releases) [![Reference](https://img.shields.io/badge/Go-Reference-red.svg)](https://pkg.go.dev/github.com/SheltonZhu/115driver) [![License](https://img.shields.io/:License-MIT-orange.svg)](https://raw.githubusercontent.com/SheltonZhu/115driver/main/LICENSE)[![Downloads](https://img.shields.io/github/downloads/SheltonZhu/115driver/total?color=%239F7AEA&logo=github)](https://github.com/SheltonZhu/115driver/releases)
+
+---
+
+## Features
+
+* Login
+  * [X] Import credential from cookies
+  * [x] Login via QRCode
+  * [X] Get signed-in user information
+* File
+  * [X] List
+  * [X] Rename
+  * [X] Move
+  * [X] Copy
+  * [X] Delete
+  * [X] Make Directory
+  * [X] Download
+  * [X] Upload
+  * [X] Rapid Upload
+  * [ ] Search
+  * [X] Get Information by ID
+  * [X] Stat File
+  * [x] Download by share code
 
 ## Example
 
@@ -20,7 +45,7 @@ func main() {
     }
     // or err := cr.FromCookie(cookieStr)
 
-    client = driver.Defalut().ImportCredential(cr)
+    client := driver.Defalut().ImportCredential(cr)
     if err := driver.LoginCheck(); err != nil {
         log.Fatalf("login error: %s", err)
     }
@@ -30,26 +55,34 @@ func main() {
 
 More examples can be found in [reference](https://pkg.go.dev/github.com/SheltonZhu/115driver).
 
-## Features
+## Contributors
 
-* Login
-  * [X] Import credential from cookies
-  * [x] Login via QRCode
-  * [X] Get signed-in user information
-* File
-  * [X] List
-  * [X] Rename
-  * [X] Move
-  * [X] Copy
-  * [X] Delete
-  * [X] Make Directory
-  * [X] Download
-  * [X] Upload SHA1
-  * [X] Upload
-  * [ ] Search
-  * [X] Get Information by ID
-  * [X] Stat File
-  * [x] Download by share code
+<!-- readme: contributors -start -->
+<table>
+<tr>
+    <td align="center">
+        <a href="https://github.com/SheltonZhu">
+            <img src="https://avatars.githubusercontent.com/u/26734784?v=4" width="100;" alt="SheltonZhu"/>
+            <br />
+            <sub><b>SheltonZhu</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/xhofe">
+            <img src="https://avatars.githubusercontent.com/u/36558727?v=4" width="100;" alt="xhofe"/>
+            <br />
+            <sub><b>xhofe</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/Ovear">
+            <img src="https://avatars.githubusercontent.com/u/1362137?v=4" width="100;" alt="Ovear"/>
+            <br />
+            <sub><b>Ovear</b></sub>
+        </a>
+    </td></tr>
+</table>
+<!-- readme: contributors -end -->
 
 ## License
 
